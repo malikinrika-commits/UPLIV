@@ -7,11 +7,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const app = express();
-const recipient = 'fk955070@gmail.com';
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(projectRoot, '.env');
 loadEnv({ path: envPath });
 const port = Number(process.env.PORT || 4001);
+const recipient = process.env.CONTACT_EMAIL || process.env.SMTP_USER;
 const allowedOrigins = new Set([
   'http://localhost:3000',
   'http://127.0.0.1:3000',
@@ -78,14 +78,20 @@ const createMailer = () => {
   loadEnv({ path: envPath });
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  if (!user || !pass) return null;
+  const host = process.env.SMTP_HOST;
+  const smtpPort = Number(process.env.SMTP_PORT || 587);
+  const secure = process.env.SMTP_SECURE
+    ? process.env.SMTP_SECURE.toLowerCase() === 'true'
+    : smtpPort === 465;
+  if (!user || !pass || !host || !recipient || !Number.isInteger(smtpPort)) return null;
 
   return {
     user,
     transporter: nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      host,
+      port: smtpPort,
+      secure,
+      requireTLS: !secure,
       auth: { user, pass },
     }),
   };
@@ -115,7 +121,9 @@ app.get('/api/health', (_req, res) => {
   loadEnv({ path: envPath });
   res.json({
     ok: true,
-    emailConfigured: Boolean(process.env.SMTP_USER && process.env.SMTP_PASS),
+    emailConfigured: Boolean(
+      process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS && recipient,
+    ),
   });
 });
 
