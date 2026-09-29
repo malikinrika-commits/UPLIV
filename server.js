@@ -92,7 +92,14 @@ const createMailer = () => {
       port: smtpPort,
       secure,
       requireTLS: !secure,
-      auth: { user, pass },
+      family: 4,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 30000,
+      auth: {
+        user,
+        pass,
+      },
     }),
   };
 };
