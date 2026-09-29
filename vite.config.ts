@@ -5,6 +5,8 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base : '/UPLIV/',
+    
     plugins: [react(), tailwindcss()],
     server: {
       proxy: {
