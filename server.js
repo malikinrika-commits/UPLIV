@@ -85,22 +85,32 @@ const createMailer = () => {
     : smtpPort === 465;
   if (!user || !pass || !host || !recipient || !Number.isInteger(smtpPort)) return null;
 
+  const transporter = nodemailer.createTransport({
+    host,
+    port: smtpPort,
+    secure,
+    requireTLS: !secure,
+    family: 4,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 30000,
+    auth: {
+      user,
+      pass,
+    },
+  });
+
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error('SMTP VERIFY FAILED:', error);
+    } else {
+      console.log('SMTP SERVER READY:', success);
+    }
+  });
+
   return {
     user,
-    transporter: nodemailer.createTransport({
-      host,
-      port: smtpPort,
-      secure,
-      requireTLS: !secure,
-      family: 4,
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 30000,
-      auth: {
-        user,
-        pass,
-      },
-    }),
+    transporter,
   };
 };
 
