@@ -2,7 +2,7 @@ import express from 'express';
 import { config as loadEnv } from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import multer from 'multer';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -11,7 +11,7 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(projectRoot, '.env');
 loadEnv({ path: envPath });
 const port = Number(process.env.PORT || 4001);
-const recipient = process.env.CONTACT_EMAIL || process.env.SMTP_USER;
+const recipient = process.env.CONTACT_EMAIL;
 const allowedOrigins = new Set([
   'http://localhost:3000',
   'http://127.0.0.1:3000',
@@ -74,44 +74,10 @@ const isValidOptionalUrl = (value) => {
   }
 };
 
-const createMailer = () => {
-  loadEnv({ path: envPath });
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const host = process.env.SMTP_HOST;
-  const smtpPort = Number(process.env.SMTP_PORT || 587);
-  const secure = process.env.SMTP_SECURE
-    ? process.env.SMTP_SECURE.toLowerCase() === 'true'
-    : smtpPort === 465;
-  if (!user || !pass || !host || !recipient || !Number.isInteger(smtpPort)) return null;
-
-  const transporter = nodemailer.createTransport({
-  host,
-  port: smtpPort,
-  secure,
-  requireTLS: !secure,
-  family: 4,
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 30000,
-  auth: {
-    user,
-    pass,
-  },
-});
-
-  transporter.verify((error, success) => {
-    if (error) {
-      console.error('SMTP VERIFY FAILED:', error);
-    } else {
-      console.log('SMTP SERVER READY:', success);
-    }
-  });
-
-  return {
-    user,
-    transporter,
-  };
+const createResendClient = () => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || !recipient) return null;
+  return new Resend(apiKey);
 };
 
 app.use((req, res, next) => {
@@ -139,7 +105,7 @@ app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
     emailConfigured: Boolean(
-      process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS && recipient,
+      process.env.RESEND_API_KEY && recipient,
     ),
   });
 });
@@ -168,9 +134,9 @@ app.post('/api/applications', applicationLimiter, uploadResume.single('resume'),
     return res.status(400).json({ error: 'Please attach your resume (PDF, DOC, or DOCX; up to 8 MB).' });
   }
 
-  const mailer = createMailer();
-  if (!mailer) {
-    console.error('SMTP_USER and SMTP_PASS must be configured before accepting applications.');
+  const resend = createResendClient();
+  if (!resend) {
+    console.error('RESEND_API_KEY and CONTACT_EMAIL must be configured before accepting applications.');
     return res.status(503).json({ error: 'Application email is not configured yet. Please try again later.' });
   }
 
@@ -179,8 +145,8 @@ app.post('/api/applications', applicationLimiter, uploadResume.single('resume'),
     .slice(0, 150) || 'resume';
 
   try {
-    await mailer.transporter.sendMail({
-      from: `UpLiv Careers <${mailer.user}>`,
+    const { error } = await resend.emails.send({
+      from: 'UpLiv <onboarding@resend.dev>',
       to: recipient,
       replyTo: email,
       subject: `Job application: ${jobTitle} — ${firstName} ${lastName}`,
@@ -199,10 +165,11 @@ app.post('/api/applications', applicationLimiter, uploadResume.single('resume'),
       ].join('\n'),
       attachments: [{
         filename: resumeName,
-        content: req.file.buffer,
+        content: req.file.buffer.toString('base64'),
         contentType: req.file.mimetype,
       }],
     });
+    if (error) throw new Error(error.message);
 
     return res.status(200).json({ ok: true });
   } catch (error) {
@@ -228,15 +195,15 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
     return res.status(400).json({ error: 'Enter a valid email address.' });
   }
 
-  const mailer = createMailer();
-  if (!mailer) {
-    console.error('SMTP_USER and SMTP_PASS must be configured before accepting contact queries.');
+  const resend = createResendClient();
+  if (!resend) {
+    console.error('RESEND_API_KEY and CONTACT_EMAIL must be configured before accepting contact queries.');
     return res.status(503).json({ error: 'Contact email is not configured yet. Please try again later.' });
   }
 
   try {
-    await mailer.transporter.sendMail({
-      from: `UpLiv Website Contact <${mailer.user}>`,
+    const { error } = await resend.emails.send({
+      from: 'UpLiv <onboarding@resend.dev>',
       to: recipient,
       replyTo: email,
       subject: `Contact Query: ${inquiryType} — ${firstName} ${lastName}`,
@@ -253,6 +220,7 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
         message,
       ].join('\n'),
     });
+    if (error) throw new Error(error.message);
 
     return res.status(200).json({ ok: true });
   } catch (error) {
