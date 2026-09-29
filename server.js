@@ -86,19 +86,19 @@ const createMailer = () => {
   if (!user || !pass || !host || !recipient || !Number.isInteger(smtpPort)) return null;
 
   const transporter = nodemailer.createTransport({
-    host,
-    port: smtpPort,
-    secure,
-    requireTLS: !secure,
-    family: 4,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 30000,
-    auth: {
-      user,
-      pass,
-    },
-  });
+  host,
+  port: smtpPort,
+  secure,
+  requireTLS: !secure,
+  family: 4,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 30000,
+  auth: {
+    user,
+    pass,
+  },
+});
 
   transporter.verify((error, success) => {
     if (error) {
