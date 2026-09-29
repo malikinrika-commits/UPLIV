@@ -1,0 +1,6 @@
+{
+  "name": "UpLiv LLC - U.S. IT Services, Staffing & Consulting",
+  "description": "UpLiv LLC provides enterprise IT staffing, technical recruiting, technology consulting, Data & AI solutions, and project-based IT services across the United States.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  --color-slate-950: #d7ebf8;
+  --color-slate-900: #f5fafe;
+  --color-slate-800: #a9cfe5;
+  --color-slate-700: #a9cfe5;
+  --color-slate-600: #42617f;
+  --color-slate-500: #42617f;
+  --color-slate-400: #42617f;
+  --color-slate-300: #294866;
+  --color-slate-200: #0b3156;
+  --color-slate-100: #081d3a;
+  --color-slate-50: #081d3a;
+  --color-sky-300: #087fc1;
+  --color-sky-400: #087fc1;
+  --color-sky-500: #079fe8;
+  --color-sky-600: #079fe8;
+  --color-sky-700: #087fc1;
+  --color-sky-800: #0b2145;
+  --color-sky-900: #c6e8f8;
+  --color-sky-950: #c6e8f8;
+  --color-emerald-300: #087fc1;
+  --color-emerald-400: #087fc1;
+  --color-emerald-500: #079fe8;
+  --color-emerald-800: #b9d9ed;
+  --color-emerald-950: #c6e8f8;
+  --color-amber-300: #087fc1;
+  --color-amber-400: #087fc1;
+  --color-amber-800: #b9d9ed;
+  --color-amber-950: #c6e8f8;
+  --color-rose-300: #087fc1;
+  --color-rose-400: #087fc1;
+  --color-rose-800: #b9d9ed;
+  --color-rose-950: #c6e8f8;
+  --color-purple-400: #087fc1;
+  --color-purple-500: #079fe8;
+  --color-purple-800: #b9d9ed;
+}
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    color-scheme: light;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: #eaf5fc;
+    color: #081d3a;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .text-white {
+    color: #081d3a;
+  }
+  .hover\:text-white:hover {
+    color: #081d3a;
+  }
+  .bg-sky-400 {
+    background-color: #08a9e8;
+  }
+  .hover\:bg-sky-300:hover {
+    background-color: #079fe8;
+  }
+  .bg-sky-500 {
+    background-color: #079fe8;
+  }
+  .text-slate-950 {
+    color: #05213f;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #e3f2fb;
+}
+::-webkit-scrollbar-thumb {
+  background: #b9d9ed;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #72c8f0;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 6s ease-in-out infinite;
+}
