@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Globe, CheckCircle2 } from 'lucide-react';
 import { COMPANY_INFO } from '../data/companyData';
+import { apiUrl } from '../lib/api';
 
 export const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -28,7 +29,7 @@ export const ContactPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch(apiUrl('/api/contact'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

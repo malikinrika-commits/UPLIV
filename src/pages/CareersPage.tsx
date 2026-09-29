@@ -8,6 +8,7 @@ import {
   X,
   Search
 } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 export const CareersPage: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<CareerOpening | null>(null);
@@ -77,7 +78,7 @@ export const CareersPage: React.FC = () => {
     submission.append('resume', resumeFile);
 
     try {
-      const response = await fetch('/api/applications', {
+      const response = await fetch(apiUrl('/api/applications'), {
         method: 'POST',
         body: submission,
       });

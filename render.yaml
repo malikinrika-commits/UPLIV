@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: upliv-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://malikinrika-commits.github.io
